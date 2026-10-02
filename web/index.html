@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Shorts AI Studio | Automated Video Generator & Uploader</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --panel-bg: rgba(14, 17, 26, 0.88);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --accent-purple: #9333ea;
+      --accent-purple-glow: rgba(147, 51, 234, 0.4);
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-yellow: #f59e0b;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(147, 51, 234, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(6, 182, 212, 0.15) 0%, transparent 45%);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      padding: 14px 32px;
+      background: rgba(10, 12, 19, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 20px var(--accent-purple-glow);
+    }
+
+    .logo-text h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #ffffff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-text p {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .badge-yt {
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .badge-yt.connected {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+    }
+
+    .badge-yt.connected::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #10b981;
+    }
+
+    .badge-yt.unconfigured {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+    }
+
+    .badge-yt.unconfigured::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #f59e0b;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #f59e0b;
+    }
+
+    .badge-yt:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Main Grid */
+    main {
+      flex: 1;
+      padding: 24px 32px;
+      display: grid;
+      grid-template-columns: 360px 1fr 400px;
+      gap: 24px;
+      max-width: 1750px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    @media (max-width: 1320px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Panels */
+    .panel {
+      background: var(--panel-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 12px;
+    }
+
+    .panel-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f1f5f9;
+    }
+
+    /* Tabs */
+    .tab-nav {
+      display: flex;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--panel-border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: rgba(147, 51, 234, 0.25);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(147, 51, 234, 0.3);
+    }
+
+    /* Media List */
+    .media-scroll {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 480px;
+      padding-right: 4px;
+    }
+
+    .media-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .media-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(147, 51, 234, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .media-card.active {
+      border-color: var(--accent-purple);
+      background: rgba(147, 51, 234, 0.14);
+      box-shadow: 0 0 16px rgba(147, 51, 234, 0.3);
+    }
+
+    .media-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .media-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .media-badge {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: var(--accent-cyan);
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* Center: 9:16 Mockup */
+    .preview-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .phone-mockup {
+      width: 320px;
+      height: 570px;
+      background: #000;
+      border-radius: 42px;
+      border: 4px solid #2d3748;
+      box-shadow: 
+        0 0 0 2px rgba(255, 255, 255, 0.1),
+        0 24px 48px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(147, 51, 234, 0.25);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 10px;
+      width: 90px;
+      height: 18px;
+      background: #000;
+      border-radius: 12px;
+      z-index: 20;
+    }
+
+    .phone-mockup video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .overlay-watermark {
+      position: absolute;
+      bottom: 24px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 15;
+    }
+
+    .overlay-watermark span {
+      color: var(--accent-yellow);
+    }
+
+    /* Controls & Presets */
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      color: #fff;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: left;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .preset-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent-cyan);
+    }
+
+    .preset-btn.active {
+      background: linear-gradient(135deg, rgba(147, 51, 234, 0.25), rgba(6, 182, 212, 0.25));
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 14px rgba(6, 182, 212, 0.35);
+    }
+
+    .preset-btn small {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--accent-purple);
+    }
+
+    /* Buttons */
+    .btn-action {
+      background: linear-gradient(135deg, #9333ea, #6366f1);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(147, 51, 234, 0.4);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 26px rgba(147, 51, 234, 0.6);
+    }
+
+    .btn-action:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-autopilot {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-autopilot:hover {
+      box-shadow: 0 6px 26px rgba(16, 185, 129, 0.6);
+    }
+
+    .btn-upload {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      box-shadow: 0 4px 20px rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-upload:hover {
+      box-shadow: 0 6px 26px rgba(239, 68, 68, 0.55);
+    }
+
+    /* Terminal Console */
+    .terminal-box {
+      background: #030508;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      font-family: 'Consolas', monospace;
+      font-size: 11px;
+      color: #38bdf8;
+      height: 125px;
+      overflow-y: auto;
+      line-height: 1.5;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #0f121d;
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      width: 90%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--panel-border);
+      padding-bottom: 12px;
+    }
+
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .btn-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <a href="#" class="logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <h1>ShortsAI Studio</h1>
+        <p>Auto Video Generator & YouTube Uploader</p>
+      </div>
+    </a>
+
+    <div class="header-actions">
+      <!-- YouTube Account Status Badge -->
+      <div class="badge-yt unconfigured" id="yt-badge" onclick="openYtModal()">
+        Checking YouTube Auth...
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left: Media Assets -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>🎬 Media Library</h2>
+        <span id="media-count" style="font-size: 12px; color: var(--text-muted);">0 items</span>
+      </div>
+
+      <!-- Tabs: Videos vs Music -->
+      <div class="tab-nav">
+        <button class="tab-btn active" id="tab-videos" onclick="switchTab('videos')">Video Clips</button>
+        <button class="tab-btn" id="tab-music" onclick="switchTab('music')">Music Tracks</button>
+      </div>
+
+      <!-- Quick Upload & URL Import -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label for="file-upload-input" style="background: rgba(147, 51, 234, 0.15); border: 1px dashed rgba(147, 51, 234, 0.4); border-radius: var(--radius-md); padding: 10px; text-align: center; cursor: pointer; font-size: 12px; font-weight: 600; color: #c084fc; transition: all 0.2s;">
+          📁 + Upload Video / Music File
+          <input type="file" id="file-upload-input" accept="video/*,audio/*" style="display: none;" onchange="handleFileUpload(this.files[0])">
+        </label>
+        
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="url-import-input" placeholder="Paste YouTube / TikTok / Media URL..." style="padding: 6px 10px; font-size: 11px;">
+          <button id="btn-import-url" onclick="handleUrlImport()" style="background: rgba(255, 255, 255, 0.08); border: 1px solid var(--panel-border); color: #fff; border-radius: 6px; padding: 0 12px; font-size: 11px; cursor: pointer; white-space: nowrap;">Import</button>
+        </div>
+      </div>
+
+      <!-- List Container -->
+      <div class="media-scroll" id="media-list-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Center: 9:16 Smartphone Mockup -->
+    <div class="preview-container">
+      <div class="phone-mockup">
+        <div class="phone-notch"></div>
+        <video id="preview-video" controls autoplay loop muted playsinline>
+          <source src="" type="video/mp4">
+        </video>
+        <div class="overlay-watermark">
+          ⚡ <span>ShortsAI</span> 9:16 Action Sync
+        </div>
+      </div>
+      <div id="preview-caption" style="font-size: 12px; color: var(--text-muted); text-align: center;">
+        Select a clip or click Generate to view live 9:16 Short
+      </div>
+    </div>
+
+    <!-- Right: Studio Controls -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>⚡ Generation & Upload</h2>
+      </div>
+
+      <!-- Subtitle Presets -->
+      <div class="control-group">
+        <label class="control-label">Subtitle Caption Preset</label>
+        <div class="preset-grid">
+          <button class="preset-btn active" data-style="extraction_neon">
+            <span>🔥 Extraction Neon</span>
+            <small>Violet glow, punch bursts</small>
+          </button>
+          <button class="preset-btn" data-style="yellow_pop">
+            <span>⚡ Yellow Pop</span>
+            <small>TikTok bold yellow captions</small>
+          </button>
+          <button class="preset-btn" data-style="cyan_cyber">
+            <span>💎 Cyan Phonk</span>
+            <small>Bass drops & cyan stroke</small>
+          </button>
+          <button class="preset-btn" data-style="minimal_clean">
+            <span>🎬 Cinema Clean</span>
+            <small>Crisp white lower-third</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- 9:16 Layout -->
+      <div class="control-group">
+        <label class="control-label">9:16 Layout Framing</label>
+        <select id="crop-style-select">
+          <option value="blur_background" selected>Cinematic Blur Background (Recommended)</option>
+          <option value="center_crop">Center Zoom Crop</option>
+        </select>
+      </div>
+
+      <!-- Video Title -->
+      <div class="control-group">
+        <label class="control-label">YouTube Shorts Title <span id="char-count">0/100</span></label>
+        <input type="text" id="video-title-input" value="Unstoppable Action Scene 🔥 #Shorts #Extraction2 #Phonk" oninput="updateCharCount()">
+      </div>
+
+      <!-- Privacy Setting -->
+      <div class="control-group">
+        <label class="control-label">Upload Privacy Status</label>
+        <select id="privacy-select">
+          <option value="public" selected>Public (Live immediately to audience)</option>
+          <option value="unlisted">Unlisted (Anyone with link can view)</option>
+          <option value="private">Private (Only you can view)</option>
+        </select>
+      </div>
+
+      <!-- Action Buttons -->
+      <button class="btn-action btn-autopilot" id="btn-autopilot">
+        <span>🤖</span> 100% AutoPilot (Zero Footage Needed)
+      </button>
+
+      <button class="btn-action" id="btn-generate">
+        <span>🎬</span> Generate Beat-Synced 9:16 Short
+      </button>
+
+      <button class="btn-action btn-upload" id="btn-upload">
+        <span>🚀</span> One-Click Upload to YouTube
+      </button>
+
+      <!-- Terminal Output -->
+      <div class="control-group">
+        <label class="control-label">Live Pipeline Logs</label>
+        <div class="terminal-box" id="terminal-log">
+          [System] ShortsAI Studio initialized.<br>
+          [Ready] Full FFmpeg & Whisper AI ready.<br>
+          [Info] 9:16 vertical render engine operational.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- YouTube Setup Modal -->
+  <div class="modal-backdrop" id="yt-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>YouTube Channel Connection</h3>
+        <button class="btn-close" onclick="closeYtModal()">&times;</button>
+      </div>
+      <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+        To upload shorts directly, configure your Google Cloud OAuth2 credentials or run the local token generator.
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">YouTube Client ID</label>
+        <input type="text" id="cfg-client-id" placeholder="xxxx.apps.googleusercontent.com">
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">YouTube Client Secret</label>
+        <input type="text" id="cfg-client-secret" placeholder="GOCSPX-xxxx">
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">YouTube Refresh Token</label>
+        <input type="text" id="cfg-refresh-token" placeholder="1//04xxxx">
+      </div>
+
+      <div style="background: rgba(255, 255, 255, 0.04); border-radius: 8px; padding: 10px 12px; font-size: 11px; color: var(--text-muted); line-height: 1.5;">
+        💡 <strong>Quick Setup:</strong> Run <code style="color: #38bdf8;">python scripts/generate_token.py</code> in your terminal once to authorize via browser and automatically populate your tokens!
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px;">
+        <button onclick="closeYtModal()" style="background: transparent; border: 1px solid var(--panel-border); color: #fff; padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer;">Cancel</button>
+        <button onclick="saveYtConfig()" style="background: var(--accent-purple); border: none; color: #fff; padding: 8px 18px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer;">Save Credentials</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activeTab = "videos";
+    let selectedClip = "";
+    let selectedMusic = "";
+    let selectedStyle = "extraction_neon";
+
+    const previewVideo = document.getElementById("preview-video");
+    const previewCaption = document.getElementById("preview-caption");
+    const terminal = document.getElementById("terminal-log");
+    const btnGenerate = document.getElementById("btn-generate");
+    const btnAutopilot = document.getElementById("btn-autopilot");
+    const btnUpload = document.getElementById("btn-upload");
+    const mediaContainer = document.getElementById("media-list-container");
+    const mediaCount = document.getElementById("media-count");
+    const ytBadge = document.getElementById("yt-badge");
+
+    function log(msg) {
+      terminal.innerHTML += `<br>[${new Date().toLocaleTimeString()}] ${msg}`;
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function updateCharCount() {
+      const val = document.getElementById("video-title-input").value;
+      document.getElementById("char-count").innerText = `${val.length}/100`;
+    }
+
+    // Check YouTube Auth status
+    async function checkYouTubeStatus() {
+      try {
+        const res = await fetch("/api/youtube_status");
+        const data = await res.json();
+        if (data.authenticated) {
+          ytBadge.className = "badge-yt connected";
+          ytBadge.innerText = `🟢 Channel: ${data.channel_title}`;
+          log(`YouTube Connected: ${data.channel_title} (${data.subscriber_count} subs)`);
+        } else {
+          ytBadge.className = "badge-yt unconfigured";
+          ytBadge.innerText = `🟡 YouTube: Setup Required`;
+        }
+      } catch (e) {
+        ytBadge.className = "badge-yt unconfigured";
+        ytBadge.innerText = `🟡 YouTube: Not Connected`;
+      }
+    }
+
+    function openYtModal() {
+      document.getElementById("yt-modal").classList.add("show");
+    }
+
+    function closeYtModal() {
+      document.getElementById("yt-modal").classList.remove("show");
+    }
+
+    async function saveYtConfig() {
+      const clientId = document.getElementById("cfg-client-id").value.trim();
+      const clientSecret = document.getElementById("cfg-client-secret").value.trim();
+      const refreshToken = document.getElementById("cfg-refresh-token").value.trim();
+
+      const res = await fetch("/api/youtube_configure", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: refreshToken
+        })
+      });
+      const data = await res.json();
+      closeYtModal();
+      checkYouTubeStatus();
+    }
+
+    // Switch between Videos and Music tabs
+    function switchTab(tab) {
+      activeTab = tab;
+      document.getElementById("tab-videos").className = `tab-btn ${tab === 'videos' ? 'active' : ''}`;
+      document.getElementById("tab-music").className = `tab-btn ${tab === 'music' ? 'active' : ''}`;
+      loadMedia();
+    }
+
+    // Load available media
+    async function loadMedia() {
+      try {
+        const endpoint = activeTab === "videos" ? "/api/videos" : "/api/music";
+        const res = await fetch(endpoint);
+        const items = await res.json();
+        mediaContainer.innerHTML = "";
+        mediaCount.innerText = `${items.length} ${activeTab}`;
+
+        if (items.length === 0) {
+          mediaContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px;">No ${activeTab} found in assets/${activeTab}. Click upload above!</div>`;
+          return;
+        }
+
+        // Set default selection if none
+        if (activeTab === "videos" && !selectedClip && items.length > 0) {
+          selectedClip = items[0].name;
+          previewVideo.src = `/media/videos/${encodeURIComponent(items[0].name)}`;
+          previewCaption.innerText = `Loaded: ${items[0].name}`;
+        }
+
+        items.forEach(item => {
+          const isSelected = activeTab === "videos" ? (item.name === selectedClip) : (item.name === selectedMusic);
+          const card = document.createElement("div");
+          card.className = `media-card ${isSelected ? 'active' : ''}`;
+          card.innerHTML = `
+            <div class="media-title">${item.name}</div>
+            <div class="media-meta">
+              <span>${item.size_mb} MB</span>
+              <span class="media-badge">${activeTab === 'videos' ? 'VIDEO CLIP' : 'SOUNDTRACK'}</span>
+            </div>
+          `;
+          card.onclick = () => {
+            document.querySelectorAll(".media-card").forEach(c => c.classList.remove("active"));
+            card.classList.add("active");
+            if (activeTab === "videos") {
+              selectedClip = item.name;
+              previewVideo.src = `/media/videos/${encodeURIComponent(item.name)}`;
+              previewVideo.play();
+              previewCaption.innerText = `Active Clip: ${item.name}`;
+              log(`Selected Clip: ${item.name}`);
+            } else {
+              selectedMusic = item.name;
+              log(`Selected Music Track: ${item.name}`);
+            }
+          };
+          mediaContainer.appendChild(card);
+        });
+      } catch (err) {
+        log(`Error loading ${activeTab}: ${err}`);
+      }
+    }
+
+    // Subtitle Preset Click
+    document.querySelectorAll(".preset-btn").forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedStyle = btn.getAttribute("data-style");
+        log(`Switched subtitle preset to: ${selectedStyle}`);
+      };
+    });
+
+    // 100% Autonomous AutoPilot
+    btnAutopilot.onclick = async () => {
+      btnAutopilot.disabled = true;
+      btnAutopilot.innerHTML = "<span>⏳</span> AutoPilot Running (Fetching clips & music)...";
+      log("AutoPilot Triggered: Auto-sourcing viral footage, phonk tracks & hooks...");
+
+      try {
+        const res = await fetch("/api/autopilot", { method: "POST" });
+        const data = await res.json();
+        if (data.status === "success") {
+          log("AutoPilot Finished! Video rendered & published.");
+          loadMedia();
+        } else {
+          log(`AutoPilot Notice: ${data.message || 'Render completed'}`);
+          loadMedia();
+        }
+      } catch (err) {
+        log(`AutoPilot error: ${err}`);
+      } finally {
+        btnAutopilot.disabled = false;
+        btnAutopilot.innerHTML = "<span>🤖</span> 100% AutoPilot (Zero Footage Needed)";
+      }
+    };
+
+    // Generate Beat-Synced 9:16 Short
+    btnGenerate.onclick = async () => {
+      if (!selectedClip) {
+        alert("Please select a video clip from the library first!");
+        return;
+      }
+
+      btnGenerate.disabled = true;
+      btnGenerate.innerHTML = "<span>⏳</span> Rendering Beat-Synced 9:16 Short...";
+      log(`Rendering 9:16 Short from: '${selectedClip}'...`);
+
+      const payload = {
+        clip: selectedClip,
+        music: selectedMusic || null,
+        style: selectedStyle,
+        crop: document.getElementById("crop-style-select").value,
+        title: document.getElementById("video-title-input").value
+      };
+
+      try {
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (data.status === "success") {
+          log(`Render completed successfully! Output: ${data.output_filename}`);
+          previewVideo.src = `/media/output/${encodeURIComponent(data.output_filename)}`;
+          previewVideo.play();
+          previewCaption.innerHTML = `✅ Rendered Short: <strong>${data.output_filename}</strong>`;
+        } else {
+          log(`Render error: ${data.message}`);
+        }
+      } catch (err) {
+        log(`Request failed: ${err}`);
+      } finally {
+        btnGenerate.disabled = false;
+        btnGenerate.innerHTML = "<span>🎬</span> Generate Beat-Synced 9:16 Short";
+      }
+    };
+
+    // Upload to YouTube
+    btnUpload.onclick = async () => {
+      btnUpload.disabled = true;
+      btnUpload.innerHTML = "<span>⏳</span> Uploading to YouTube Shorts...";
+      log("Authorizing & Uploading to YouTube...");
+
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: document.getElementById("video-title-input").value,
+            privacy: document.getElementById("privacy-select").value,
+          })
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+          log(`🎉 Upload Success! Video URL: ${data.url}`);
+          window.open(data.url, "_blank");
+        } else {
+          log(`Upload notice: ${data.message}`);
+          openYtModal();
+        }
+      } catch (err) {
+        log(`Upload error: ${err}`);
+      } finally {
+        btnUpload.disabled = false;
+        btnUpload.innerHTML = "<span>🚀</span> One-Click Upload to YouTube";
+      }
+    };
+
+    async function handleFileUpload(file) {
+      if (!file) return;
+      log(`Uploading ${file.name}...`);
+      try {
+        const res = await fetch("/api/upload_file", {
+          method: "POST",
+          headers: { "X-File-Name": encodeURIComponent(file.name) },
+          body: file
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+          log(`File added to assets: ${data.filename}`);
+          loadMedia();
+        } else {
+          log(`Upload failed: ${data.message}`);
+        }
+      } catch (err) {
+        log(`Error: ${err}`);
+      }
+    }
+
+    async function handleUrlImport() {
+      const input = document.getElementById("url-import-input");
+      const url = input.value.trim();
+      if (!url) return;
+      log(`Importing media from: ${url}`);
+      try {
+        const res = await fetch("/api/download_url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url, is_audio: activeTab === "music" })
+        });
+        const data = await res.json();
+        if (data.status === "success") {
+          log(`Import complete: ${data.filename}`);
+          input.value = "";
+          loadMedia();
+        } else {
+          log(`Import error: ${data.message}`);
+        }
+      } catch (err) {
+        log(`Error: ${err}`);
+      }
+    }
+
+    // Init
+    updateCharCount();
+    checkYouTubeStatus();
+    loadMedia();
+  </script>
+</body>
+</html>
